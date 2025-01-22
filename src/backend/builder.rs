@@ -548,6 +548,8 @@ impl<'a, P: PostProcessor> Builder<'a, P> {
             slow_duration: self.slow_blink,
             last_slow_toggle: Instant::now(),
             show_slow: true,
+            terminal_width_px: 0,
+            terminal_height_px: 0,
         })
     }
 }

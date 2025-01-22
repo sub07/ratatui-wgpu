@@ -64,7 +64,6 @@ pub struct DefaultPostProcessor {
     bindings: BindGroupLayout,
     sampler: Sampler,
     pipeline: RenderPipeline,
-
     blitter: RenderBundle,
 }
 
@@ -206,6 +205,7 @@ impl PostProcessor for DefaultPostProcessor {
         _text_view: &wgpu::TextureView,
         surface_config: &wgpu::SurfaceConfiguration,
         surface_view: &wgpu::TextureView,
+        terminal_size_px: (u32, u32),
     ) {
         {
             let mut uniforms = queue
@@ -216,7 +216,7 @@ impl PostProcessor for DefaultPostProcessor {
                 )
                 .unwrap();
             uniforms.copy_from_slice(bytemuck::bytes_of(&Uniforms {
-                screen_size: [surface_config.width as f32, surface_config.height as f32],
+                screen_size: [terminal_size_px.0 as f32, terminal_size_px.1 as f32],
                 use_srgb: u32::from(surface_config.format.is_srgb()),
                 _pad0: [0; 5],
             }));

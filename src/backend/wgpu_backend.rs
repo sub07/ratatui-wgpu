@@ -195,6 +195,8 @@ pub struct WgpuBackend<
     pub(super) fonts: Fonts<'f>,
     pub(super) reset_fg: Rgb,
     pub(super) reset_bg: Rgb,
+    pub terminal_width_px: u32,
+    pub terminal_height_px: u32,
 
     pub(super) fast_duration: Duration,
     pub(super) last_fast_toggle: Instant,
@@ -230,25 +232,27 @@ impl<'f, 's, P: PostProcessor, S: RenderSurface<'s>> WgpuBackend<'f, 's, P, S> {
             return;
         }
 
-        let (inset_width, inset_height) = match self.viewport {
-            Viewport::Full => (0, 0),
-            Viewport::Shrink { width, height } => (width, height),
-        };
+        // let (inset_width, inset_height) = match self.viewport {
+        // Viewport::Full => (0, 0),
+        // Viewport::Shrink { width, height } => panic!("useless in my use case"),
+        // };
 
         let dims = self.size().unwrap();
         let current_width = dims.width;
         let current_height = dims.height;
 
+        let chars_wide = width / self.fonts.min_width_px();
+        let chars_high = height / self.fonts.height_px();
+
+        let terminal_width_px = chars_wide as f32 * self.fonts.min_width_px() as f32;
+        let terminal_height_px = chars_high as f32 * self.fonts.height_px() as f32;
+        self.terminal_width_px = terminal_width_px as u32;
+        self.terminal_height_px = terminal_height_px as u32;
+
         self.surface_config.width = width;
         self.surface_config.height = height;
         self.surface
             .configure(&self.device, &self.surface_config, Token);
-
-        let width = width - inset_width;
-        let height = height - inset_height;
-
-        let chars_wide = width / self.fonts.min_width_px();
-        let chars_high = height / self.fonts.height_px();
 
         if chars_wide != current_width as u32 || chars_high != current_height as u32 {
             self.cells.clear();
@@ -394,10 +398,15 @@ impl<'f, 's, P: PostProcessor, S: RenderSurface<'s>> WgpuBackend<'f, 's, P, S> {
             &self.wgpu_state.text_dest_view,
             &self.surface_config,
             texture.get_view(Token),
+            (self.terminal_width_px, self.terminal_height_px),
         );
 
         self.queue.submit(Some(encoder.finish()));
         texture.present(Token);
+    }
+
+    pub fn char_size(&self) -> (u32, u32) {
+        (self.fonts.min_width_px(), self.fonts.height_px())
     }
 }
 

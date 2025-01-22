@@ -76,6 +76,7 @@ pub trait PostProcessor {
         text_view: &TextureView,
         surface_config: &SurfaceConfiguration,
         surface_view: &TextureView,
+        terminal_size_px: (u32, u32),
     );
 
     /// Called to see if this post processor wants to update the screen. By
