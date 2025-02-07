@@ -249,8 +249,8 @@ impl<'f, 's, P: PostProcessor, S: RenderSurface<'s>> WgpuBackend<'f, 's, P, S> {
         self.terminal_width_px = terminal_width_px as u32;
         self.terminal_height_px = terminal_height_px as u32;
 
-        self.surface_config.width = width;
-        self.surface_config.height = height;
+        self.surface_config.width = terminal_width_px as u32;
+        self.surface_config.height = terminal_height_px as u32;
         self.surface
             .configure(&self.device, &self.surface_config, Token);
 
